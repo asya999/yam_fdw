@@ -38,7 +38,7 @@ def coltype_formatter(coltype, otype):
     if coltype in ('timestamp without time zone', 'timestamp with time zone', 'date'):
         return lambda x: x if hasattr(x, 'isoformat') else parse(x)
     elif otype=='ObjectId':
-        return lambda x: bjectId(x)
+        return lambda x: ObjectId(x)
     else:
        return None
 

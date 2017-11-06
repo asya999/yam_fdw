@@ -10,12 +10,13 @@ from pymongo import ASCENDING
 from dateutil.parser import parse
 from bson.objectid import ObjectId
 
-from functools import partial
+from functools import partial, reduce
 
 import time
 
 from pymongo.son_manipulator import SONManipulator
 import json
+import sys
 
 # currently unused
 class Transform(SONManipulator):
@@ -84,7 +85,10 @@ class Yamfdw(ForeignDataWrapper):
         self.indexes={}
         if self.stats["nindexes"]>1:
             indexdict = self.coll.index_information()
-            self.indexes = dict([(idesc['key'][0][0], idesc.get('unique',False))  for iname, idesc in indexdict.iteritems()])
+            if sys.version_info[0] < 3:
+                self.indexes = dict([(idesc['key'][0][0], idesc.get('unique',False))  for iname, idesc in indexdict.iteritems()])
+            else:
+                self.indexes = dict([(idesc['key'][0][0], idesc.get('unique',False))  for iname, idesc in indexdict.items()])
             if self.debug: log2pg('self.indexes: {} '.format(self.indexes))
 
         self.fields = dict([(col, {'formatter': coltype_formatter(coldef.type_name, coldef.options.get('type',None)),
@@ -197,11 +201,14 @@ class Yamfdw(ForeignDataWrapper):
             for res in cur:
                docCount=res['sum']
                break
-
-        for x in xrange(docCount):
-            if eqfields: yield eqfields
-            else: yield d
-
+        if sys.version_info[0] < 3:
+            for x in xrange(docCount):
+                if eqfields: yield eqfields
+                else: yield d
+        else:
+            for x in range(docCount):
+                if eqfields: yield eqfields
+                else: yield d
         # we are done
         if self.debug: t1 = time.time()
 

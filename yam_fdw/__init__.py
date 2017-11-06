@@ -201,11 +201,14 @@ class Yamfdw(ForeignDataWrapper):
             for res in cur:
                docCount=res['sum']
                break
-
-        for x in xrange(docCount):
-            if eqfields: yield eqfields
-            else: yield d
-
+        if sys.version_info[0] < 3:
+            for x in xrange(docCount):
+                if eqfields: yield eqfields
+                else: yield d
+        else:
+            for x in range(docCount):
+                if eqfields: yield eqfields
+                else: yield d
         # we are done
         if self.debug: t1 = time.time()
 

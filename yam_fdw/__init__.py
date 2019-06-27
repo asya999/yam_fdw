@@ -37,6 +37,10 @@ dict_traverser = partial(reduce, lambda x, y: x.get(y) if type(x) == dict else x
 def coltype_formatter(coltype, otype):
     if coltype in ('timestamp without time zone', 'timestamp with time zone', 'date'):
         return lambda x: x if hasattr(x, 'isoformat') else parse(x)
+    elif coltype in ('double precision', 'real', 'numeric', ):
+        return lambda x: float(x)
+    elif coltype in ('integer', 'biting', 'smallint', 'bigserial', 'smallserial', 'serial'):
+        return lambda x: int(x)
     elif otype=='ObjectId':
         return lambda x: ObjectId(x)
     else:
